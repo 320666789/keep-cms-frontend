@@ -58,6 +58,9 @@ module.exports = {
       },
       '/admin/role/queryRoles': {
         target: 'http://127.0.0.1:8801'
+      },
+      '/admin/menu/queryMenus': {
+        target: 'http://127.0.0.1:8801'
       }
     }
   },

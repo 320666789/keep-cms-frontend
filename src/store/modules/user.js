@@ -79,6 +79,8 @@ const actions = {
           reject('getInfo: roles must be a non-null array!')
         }
 
+        // localStorage.setItem('roles', JSON.stringify(roles))
+
         commit('SET_ROLES', roles)
         commit('SET_NAME', name)
         commit('SET_AVATAR', avatar)

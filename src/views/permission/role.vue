@@ -26,24 +26,24 @@
       </el-table-column>
     </el-table>
 
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'Edit Role':'New Role'">
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'">
       <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="Name">
-          <el-input v-model="role.name" placeholder="Role Name" />
+        <el-form-item label="角色名称">
+          <el-input v-model="role.roleName" placeholder="请输入角色名称" />
         </el-form-item>
-        <el-form-item label="Desc">
+        <el-form-item label="角色描述">
           <el-input
-            v-model="role.description"
+            v-model="role.roleDesc"
             :autosize="{ minRows: 2, maxRows: 4}"
             type="textarea"
-            placeholder="Role Description"
+            placeholder="请输入角色描述"
           />
         </el-form-item>
-        <el-form-item label="Menus">
+        <el-form-item label="菜单权限">
           <el-tree
             ref="tree"
             :check-strictly="checkStrictly"
-            :data="routesData"
+            :data="menusList"
             :props="defaultProps"
             show-checkbox
             node-key="path"
@@ -63,7 +63,9 @@
 import path from 'path'
 import { deepClone } from '@/utils'
 import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
+import { getMenus } from '@/api/menu'
 import { getCommonData } from '@/utils/commonData.js'
+import store from '@/store'
 
 const defaultRole = {
   key: '',
@@ -75,7 +77,8 @@ const defaultRole = {
 export default {
   data() {
     return {
-      role: Object.assign({}, defaultRole),
+      // role: Object.assign({}, defaultRole),
+      role: {},
       routes: [],
       rolesList: [],
       dialogVisible: false,
@@ -83,8 +86,9 @@ export default {
       checkStrictly: false,
       defaultProps: {
         children: 'children',
-        label: 'title'
-      }
+        label: 'label'
+      },
+      menusList: []
     }
   },
   computed: {
@@ -96,6 +100,7 @@ export default {
     // Mock: get all routes and roles list from server
     // this.getRoutes()
     this.getRoles()
+    this.getMenus()
   },
   methods: {
     async getRoutes() {
@@ -104,6 +109,7 @@ export default {
       console.log('getRoutes:', res)
       this.routes = this.generateRoutes(res.data)
     },
+    // 查询所有角色
     async getRoles() {
       const sysRole = {}
       const singleBody = sysRole
@@ -113,6 +119,20 @@ export default {
       const params = getCommonData(reqParams)
       const res = await getRoles(params)
       this.rolesList = res.body.listBody
+    },
+    // 查询所有菜单
+    async getMenus() {
+      const roles = store.getters.roles
+      console.log('roles:', roles)
+      const singleBody = {
+        roles: roles
+      }
+      const reqParams = {
+        singleBody: singleBody
+      }
+      const params = getCommonData(reqParams)
+      const res = await getMenus(params)
+      this.menusList = res.body.listBody
     },
 
     // Reshape the routes structure so that it looks the same as the sidebar
