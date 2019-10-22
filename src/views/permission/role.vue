@@ -1,27 +1,27 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="handleAddRole">New Role</el-button>
+    <el-button type="primary" @click="handleAddRole">新建角色</el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="Role Key" width="220">
+      <el-table-column align="center" label="角色标识" width="220">
         <template slot-scope="scope">
-          {{ scope.row.key }}
+          {{ scope.row.roleCode }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Role Name" width="220">
+      <el-table-column align="center" label="角色名称" width="220">
         <template slot-scope="scope">
-          {{ scope.row.name }}
+          {{ scope.row.roleName }}
         </template>
       </el-table-column>
-      <el-table-column align="header-center" label="Description">
+      <el-table-column align="header-center" label="角色描述">
         <template slot-scope="scope">
-          {{ scope.row.description }}
+          {{ scope.row.roleDesc }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Operations">
+      <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope)">Edit</el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope)">Delete</el-button>
+          <el-button type="primary" size="small" @click="handleEdit(scope)">编辑</el-button>
+          <el-button type="danger" size="small" @click="handleDelete(scope)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -52,8 +52,8 @@
         </el-form-item>
       </el-form>
       <div style="text-align:right;">
-        <el-button type="danger" @click="dialogVisible=false">Cancel</el-button>
-        <el-button type="primary" @click="confirmRole">Confirm</el-button>
+        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
+        <el-button type="primary" @click="confirmRole">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -63,6 +63,7 @@
 import path from 'path'
 import { deepClone } from '@/utils'
 import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
+import { getCommonData } from '@/utils/commonData.js'
 
 const defaultRole = {
   key: '',
@@ -93,18 +94,25 @@ export default {
   },
   created() {
     // Mock: get all routes and roles list from server
-    this.getRoutes()
+    // this.getRoutes()
     this.getRoles()
   },
   methods: {
     async getRoutes() {
       const res = await getRoutes()
       this.serviceRoutes = res.data
+      console.log('getRoutes:', res)
       this.routes = this.generateRoutes(res.data)
     },
     async getRoles() {
-      const res = await getRoles()
-      this.rolesList = res.data
+      const sysRole = {}
+      const singleBody = sysRole
+      const reqParams = {
+        singleBody: singleBody
+      }
+      const params = getCommonData(reqParams)
+      const res = await getRoles(params)
+      this.rolesList = res.body.listBody
     },
 
     // Reshape the routes structure so that it looks the same as the sidebar

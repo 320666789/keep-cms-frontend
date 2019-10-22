@@ -84,19 +84,6 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/menuManage',
-    component: Layout,
-    redirect: '/menuManage/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/menuManage/index'),
-        name: '菜单管理',
-        meta: { title: '菜单管理', icon: 'list', affix: true }
-      }
-    ]
-  },
-  {
     path: '/documentation',
     component: Layout,
     children: [

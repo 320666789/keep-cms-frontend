@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">管理系统</h3>
+        <h3 class="title">登 录</h3>
       </div>
 
       <el-form-item prop="username">
@@ -45,18 +45,9 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;" @click.native.prevent="handleLogin">登录</el-button>
 
-      <div style="position:relative;height: 36px;">
-        <!-- <div class="tips">
-          <span>Username : admin</span>
-          <span>Password : any</span>
-        </div>
-        <div class="tips">
-          <span style="margin-right:18px;">Username : editor</span>
-          <span>Password : any</span>
-        </div> -->
-
+      <div style="position:relative;margin: 20px 0 0 0px;height: 36px;">
         <el-button class="thirdparty-button" type="primary" @click="showDialog=true">
           第三方登录
         </el-button>
@@ -76,9 +67,7 @@
 <script>
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
-import { getCommonData } from '@/utils/commonData.js'
-import { loginByUsername,
-  getUserInfoByUserName } from '@/api/login'
+
 export default {
   name: 'Login',
   components: { SocialSign },
@@ -100,7 +89,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '123456'
+        password: '111111'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -117,7 +106,6 @@ export default {
   watch: {
     $route: {
       handler: function(route) {
-        console.log('watch-->route:', route)
         const query = route.query
         if (query) {
           this.redirect = query.redirect
@@ -167,59 +155,14 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('user/LoginByUsername', this.loginForm).then(res => {
-            console.log('aaaaa')
-            // this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-            // this.loading = false
-            console.log('dispatchStore', res)
-            var access_token = res['access_token']
-            var refresh_token = res['refresh_token']
-            if (access_token) {
-              const sysUser = {
-                userName: this.loginForm.username
-              }
-              const singleBody = sysUser
-              const reqParams = {
-                singleBody: singleBody
-              }
-              const params = getCommonData(reqParams)
-              console.log('params:', params)
-              getUserInfoByUserName(access_token, params).then(response => {
-                console.log('getUserInfoByUserName:', response)
-                const user = response.body.listBody[0].sysUser
-                const roles = response.body.listBody[0].roles
-                const permissions = response.body.listBody[0].permissions
-                console.log('user:', user)
-                localStorage.setItem('pwdChanged', user.pwdChanged)
-                localStorage.setItem('userId', user.userId)
-                localStorage.setItem('realName', user.realName)
-                localStorage.setItem('userName', user.userName)
-                localStorage.setItem('duty', user.duty)
-                console.log('roles:', roles)
-                console.log('permissions:', permissions)
-                localStorage.setItem('roles', JSON.stringify(roles))
-                localStorage.setItem('permissions', JSON.stringify(permissions))
-                // Cookies.set("userName",user.userName);
-                // Cookies.set("password",user.password);
-                // commit('SET_ROLES', roles)
-                // commit('SET_PERMISSIONS', permissions)
-                // 登录次数加一
-                // addLoginTimes({username:user.username,corporationNo:user.corporationNo}).then(res=>{});
-                this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-              })
-            }
-            // 需求管理工具获取token用
-            // Cookies.set("access_token",access_token);
-            // localStorage.setItem("access_token",access_token);
-            // localStorage.setItem("refresh_token",refresh_token);
-            // this.$store.commit("ADD_TAG", this.tagWel);
-            // this.$router.push({ path: '/' });
-            // this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-            // this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
-          })
+          this.$store.dispatch('user/login', this.loginForm)
+            .then(() => {
+              this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+              this.loading = false
+            })
+            .catch(() => {
+              this.loading = false
+            })
         } else {
           console.log('error submit!!')
           return false

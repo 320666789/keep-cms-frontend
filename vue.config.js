@@ -37,26 +37,29 @@ module.exports = {
     //   warnings: false,
     //   errors: true
     // },
+    // proxy: {
+    //   // change xxx-api/login => mock/login
+    //   // detail: https://cli.vuejs.org/config/#devserver-proxy
+    //   [process.env.VUE_APP_BASE_API]: {
+    //     target: `http://127.0.0.1:${port}/mock`,
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       ['^' + process.env.VUE_APP_BASE_API]: ''
+    //     }
+    //   }
+    // },
+    // after: require('./mock/mock-server.js')
     proxy: {
       '/dooleenApi/oauth/token': {
         target: 'http://127.0.0.1:8401'
       },
       '/admin/user/getUserInfoByUserName': {
         target: 'http://127.0.0.1:8801'
+      },
+      '/admin/role/queryRoles': {
+        target: 'http://127.0.0.1:8801'
       }
     }
-    // proxy: {
-    //   // change xxx-api/login => mock/login
-    //   // detail: https://cli.vuejs.org/config/#devserver-proxy
-    //   '/dooleenApi/oauth/token': {
-    //     target: `http://127.0.0.1:8401/dooleenApi/oauth/token`,
-    //     changeOrigin: true
-    //     // pathRewrite: {
-    //     //   'http://localhost:9527/oauth/token': 'http://127.0.0.1:8401/oauth/token'
-    //     // }
-    //   }
-    // }
-    // after: require('./mock/mock-server.js')
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that

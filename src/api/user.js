@@ -1,18 +1,39 @@
 import request from '@/utils/request'
 
-export function login(data) {
+// export function login(data) {
+//   return request({
+//     url: '/user/login',
+//     method: 'post',
+//     data
+//   })
+// }
+
+export const login = (username, password) => {
+  var grant_type = 'password'
+  var scope = 'all'
   return request({
-    url: '/user/login',
+    url: '/dooleenApi/oauth/token',
+    headers: {
+      'Authorization': 'Basic ZG9vbGVlbjpkb29sZWVu'
+    },
     method: 'post',
-    data
+    params: { username, password, grant_type, scope }
   })
 }
 
-export function getInfo(token) {
+export function getInfo(token, params) {
+  // return request({
+  //   url: '/admin/user/getUserInfoByUserName',
+  //   method: 'get',
+  //   params: { token }
+  // })
   return request({
-    url: '/user/info',
-    method: 'get',
-    params: { token }
+    url: '/admin/user/getUserInfoByUserName',
+    headers: {
+      'Authorization': 'Bearer ' + token
+    },
+    method: 'post',
+    data: params
   })
 }
 

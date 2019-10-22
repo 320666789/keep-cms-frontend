@@ -8,9 +8,10 @@ import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/login', '/auth-redirect', '/LoginByUsername'] // no redirect whitelist
+const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
+  console.log('router.beforeEach.....')
   // start progress bar
   NProgress.start()
 
@@ -19,29 +20,22 @@ router.beforeEach(async(to, from, next) => {
 
   // determine whether the user has logged in
   const hasToken = getToken()
-  // const hasToken = localStorage.getItem('access_token')
-  console.log('router.beforeEach....')
+  // console.log('hasToken:', hasToken)
   if (hasToken) {
-    console.log('to:', to)
     if (to.path === '/login') {
-      console.log('退出登录')
       // if is logged in, redirect to the home page
       next({ path: '/' })
       NProgress.done()
     } else {
       // determine whether the user has obtained his permission roles through getInfo
-      // const hasRoles = store.getters.roles && store.getters.roles.length > 0
-      const roles = localStorage.getItem('roles')
-      const hasRoles = roles && JSON.parse(roles).length > 0
-      console.log('hasRoles:', hasRoles)
+      const hasRoles = store.getters.roles && store.getters.roles.length > 0
       if (hasRoles) {
         next()
       } else {
         try {
           // get user info
           // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
-          // const { roles } = await store.dispatch('user/getInfo')
-          const roles = localStorage.getItem('roles')
+          const { roles } = await store.dispatch('user/getInfo')
 
           // generate accessible routes map based on roles
           const accessRoutes = await store.dispatch('permission/generateRoutes', roles)

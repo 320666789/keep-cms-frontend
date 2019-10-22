@@ -6,7 +6,6 @@ import { getToken } from '@/utils/auth'
 // create an axios instance
 const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // baseURL: 'http://localhost:8401',
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
@@ -15,18 +14,18 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-    console.log('config:', config)
+
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken()
+      config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带token--['X-Token']为自定义key 请根据实际情况自行修改
     }
     return config
   },
   error => {
     // do something with request error
-    console.log('request-->error:', error) // for debug
+    console.log(error) // for debug
     return Promise.reject(error)
   }
 )
@@ -45,12 +44,18 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-    console.log('response-->res:', res)
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.dooleen) {
+    const status = response.status
+    // console.log('response-->response:', response)
+
+    // 判断是否是授权（获取token）
+    if (response.config &&
+        response.config.url === '/dooleenApi/oauth/token' &&
+        status === 200 &&
+        res.access_token) {
       return res
     }
 
+    // if the custom code is not 20000, it is judged as an error.
     if (res.head.errorCode !== '0000') {
       Message({
         message: res.message || 'Error',

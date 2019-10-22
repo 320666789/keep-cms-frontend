@@ -1,18 +1,14 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
-import {
-  loginByUsername
-} from '@/api/login'
+import { getCommonData } from '@/utils/commonData.js'
 
 const state = {
   token: getToken(),
   name: '',
   avatar: '',
   introduction: '',
-  roles: [],
-  permissions: [],
-  userName: ''
+  roles: []
 }
 
 const mutations = {
@@ -30,48 +26,19 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
-  },
-  SET_PERMISSIONS: (state, permissions) => {
-    state.permissions = permissions
-  },
-  SET_USERNAME: (state, userName) => {
-    state.userName = userName
   }
 }
 
 const actions = {
-  // 根据用户名登录
-  LoginByUsername({
-    commit
-  }, origuserInfo) {
-    console.log('333333')
-    return new Promise((resolve, reject) => {
-      loginByUsername(origuserInfo.username, origuserInfo.password).then(response => {
-        const data = response
-        console.log('user.js-->data:', data)
-        if (data.access_token) {
-          localStorage.setItem('access_token', data.access_token)
-          localStorage.setItem('refresh_token', data.refresh_token)
-          setToken(data.access_token)
-          commit('SET_USERNAME', origuserInfo.username)
-          resolve(response)
-        } else {
-          reject('获取token失败')
-        }
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },
-
   // user login
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
+      login(username.trim(), password).then(response => {
+        const data = response
+        sessionStorage.setItem('userName', username)
+        commit('SET_TOKEN', data.access_token)
+        setToken(data.access_token)
         resolve()
       }).catch(error => {
         reject(error)
@@ -82,14 +49,30 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
+      const userName = sessionStorage.getItem('userName')
 
+      const sysUser = {
+        userName: userName
+      }
+      const singleBody = sysUser
+      const reqParams = {
+        singleBody: singleBody
+      }
+      const params = getCommonData(reqParams)
+
+      getInfo(state.token, params).then(response => {
+        const data = response.body.listBody[0]
+        // console.log('getInfo:', response)
         if (!data) {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name, avatar, introduction } = data
+        // const { roles, name, avatar, introduction } = data
+        const roles = data.roles
+        const sysUser = data.sysUser
+        const name = sysUser.userName
+        const avatar = sysUser.avatar
+        const introduction = sysUser.introduction
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -114,9 +97,14 @@ const actions = {
       commit('SET_ROLES', [])
       removeToken()
       resetRouter()
-      dispatch('tagsView/delAllViews', null, { root: true })
-      resolve()
+      localStorage.clear()
+      sessionStorage.clear()
 
+      // reset visited views and cached views
+      // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
+      dispatch('tagsView/delAllViews', null, { root: true })
+
+      resolve()
       // logout(state.token).then(() => {
       //   commit('SET_TOKEN', '')
       //   commit('SET_ROLES', [])
