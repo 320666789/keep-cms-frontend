@@ -109,6 +109,19 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/user',
+    component: Layout,
+    redirect: '/user/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/user/index'),
+        name: '用户管理',
+        meta: { title: '用户管理', icon: 'peoples', noCache: true }
+      }
+    ]
+  },
+  {
     path: '/profile',
     component: Layout,
     redirect: '/profile/index',
@@ -138,7 +151,7 @@ export const asyncRoutes = [
     meta: {
       title: 'Permission',
       icon: 'lock',
-      roles: ['admin', 'editor'] // you can set roles in root nav
+      roles: ['admin'] // you can set roles in root nav
     },
     children: [
       {
@@ -170,7 +183,24 @@ export const asyncRoutes = [
       }
     ]
   },
-
+  {
+    path: '/menu',
+    component: Layout,
+    redirect: '/menu/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/menu/index'),
+        name: '菜单管理',
+        meta: {
+          title: '菜单管理',
+          icon: 'list',
+          noCache: true,
+          roles: ['admin'] // you can set roles in root nav
+        }
+      }
+    ]
+  },
   {
     path: '/icon',
     component: Layout,

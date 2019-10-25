@@ -22,11 +22,13 @@
         <template slot-scope="scope">
           <el-button type="primary" size="small" @click="handleEdit(scope)">编辑</el-button>
           <el-button type="danger" size="small" @click="handleDelete(scope)">删除</el-button>
+          <el-button type="info" size="small" @click="handleAuthorize(scope)">权限</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'">
+    <!-- 新增、编辑角色 -->
+    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'" show-close v-loading="dialogLoading">
       <el-form :model="role" label-width="80px" label-position="left">
         <el-form-item label="角色名称">
           <el-input v-model="role.roleName" placeholder="请输入角色名称" />
@@ -39,21 +41,29 @@
             placeholder="请输入角色描述"
           />
         </el-form-item>
-        <el-form-item label="菜单权限">
-          <el-tree
-            ref="tree"
-            :check-strictly="checkStrictly"
-            :data="menusList"
-            :props="defaultProps"
-            show-checkbox
-            node-key="path"
-            class="permission-tree"
-          />
-        </el-form-item>
       </el-form>
       <div style="text-align:right;">
-        <el-button type="danger" @click="dialogVisible=false">取消</el-button>
+        <el-button type="danger" @click="cancelRole">取消</el-button>
         <el-button type="primary" @click="confirmRole">确定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 权限设置 -->
+    <el-dialog :visible.sync="authorizeVisible" title="分配权限" show-close v-loading="dialogLoading">
+      <el-tree
+        ref="tree"
+        :check-strictly="checkStrictly"
+        :data="menusList"
+        :props="defaultProps"
+        :default-checked-keys="defaultCheckedKeys"
+        show-checkbox
+        node-key="id"
+        class="permission-tree"
+        highlight-current
+      />
+      <div style="text-align:right;">
+        <el-button type="danger" @click="cancelAuthorize">取消</el-button>
+        <el-button type="primary" @click="confirmAuthorize">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -62,8 +72,8 @@
 <script>
 import path from 'path'
 import { deepClone } from '@/utils'
-import { getRoutes, getRoles, addRole, deleteRole, updateRole } from '@/api/role'
-import { getMenus } from '@/api/menu'
+import { getRoutes, getRoles, addRole, deleteRole, updateRole, updateRoleAuthority } from '@/api/role'
+import { getMenus, getMenuIdsByRoles } from '@/api/menu'
 import { getCommonData } from '@/utils/commonData.js'
 import store from '@/store'
 
@@ -82,13 +92,16 @@ export default {
       routes: [],
       rolesList: [],
       dialogVisible: false,
+      authorizeVisible: false,
       dialogType: 'new',
       checkStrictly: false,
       defaultProps: {
         children: 'children',
         label: 'label'
       },
-      menusList: []
+      menusList: [],
+      defaultCheckedKeys: [],
+      dialogLoading: false
     }
   },
   computed: {
@@ -124,9 +137,7 @@ export default {
     async getMenus() {
       const roles = store.getters.roles
       console.log('roles:', roles)
-      const singleBody = {
-        roles: roles
-      }
+      const singleBody = {}
       const reqParams = {
         singleBody: singleBody
       }
@@ -184,17 +195,27 @@ export default {
       this.dialogType = 'new'
       this.dialogVisible = true
     },
-    handleEdit(scope) {
+    async handleEdit(scope) {
+      this.dialogLoading = true
       this.dialogType = 'edit'
       this.dialogVisible = true
-      this.checkStrictly = true
-      this.role = deepClone(scope.row)
-      this.$nextTick(() => {
-        const routes = this.generateRoutes(this.role.routes)
-        this.$refs.tree.setCheckedNodes(this.generateArr(routes))
-        // set checked state of a node not affects its father and child nodes
-        this.checkStrictly = false
-      })
+      // this.checkStrictly = true
+      this.defaultCheckedKeys = []
+      this.role = scope.row
+
+      const roles = [scope.row.roleCode]
+      console.log('roles:', roles)
+      const singleBody = {
+        roles: roles
+      }
+      const reqParams = {
+        singleBody: singleBody
+      }
+      const params = getCommonData(reqParams)
+      const res = await getMenuIdsByRoles(params)
+      this.defaultCheckedKeys = res.body.listBody
+      console.log('this.defaultCheckedKeys:', this.defaultCheckedKeys)
+      this.dialogLoading = false
     },
     handleDelete({ $index, row }) {
       this.$confirm('Confirm to remove the role?', 'Warning', {
@@ -230,37 +251,62 @@ export default {
       return res
     },
     async confirmRole() {
+      this.dialogLoading = true
       const isEdit = this.dialogType === 'edit'
-
       const checkedKeys = this.$refs.tree.getCheckedKeys()
-      this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
-
+      console.log('checkedKeys:', checkedKeys)
       if (isEdit) {
-        await updateRole(this.role.key, this.role)
-        for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].key === this.role.key) {
-            this.rolesList.splice(index, 1, Object.assign({}, this.role))
-            break
-          }
+        const singleBody = this.role
+        const reqParams = {
+          singleBody: singleBody,
+          userId: localStorage.getItem('userId')
         }
-      } else {
-        const { data } = await addRole(this.role)
-        this.role.key = data.key
-        this.rolesList.push(this.role)
+        const params = getCommonData(reqParams)
+        await updateRole(params)
+        this.dialogVisible = false
       }
-
-      const { description, key, name } = this.role
-      this.dialogVisible = false
-      this.$notify({
-        title: 'Success',
-        dangerouslyUseHTMLString: true,
-        message: `
-            <div>Role Key: ${key}</div>
-            <div>Role Name: ${name}</div>
-            <div>Description: ${description}</div>
-          `,
+      this.dialogLoading = false
+      this.$message({
+        message: '更新成功！',
         type: 'success'
       })
+      return
+
+      // const checkedKeys = this.$refs.tree.getCheckedKeys()
+      // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+
+      // if (isEdit) {
+      //   await updateRole(this.role.key, this.role)
+      //   for (let index = 0; index < this.rolesList.length; index++) {
+      //     if (this.rolesList[index].key === this.role.key) {
+      //       this.rolesList.splice(index, 1, Object.assign({}, this.role))
+      //       break
+      //     }
+      //   }
+      // } else {
+      //   const { data } = await addRole(this.role)
+      //   this.role.key = data.key
+      //   this.rolesList.push(this.role)
+      // }
+
+      // const { description, key, name } = this.role
+      // this.dialogVisible = false
+      // this.$notify({
+      //   title: 'Success',
+      //   dangerouslyUseHTMLString: true,
+      //   message: `
+      //       <div>Role Key: ${key}</div>
+      //       <div>Role Name: ${name}</div>
+      //       <div>Description: ${description}</div>
+      //     `,
+      //   type: 'success'
+      // })
+    },
+    cancelRole() {
+      this.role = {}
+      this.defaultCheckedKeys = []
+      this.dialogVisible = false
+      // this.$refs.tree.setCheckedNodes([])
     },
     // reference: src/view/layout/components/Sidebar/SidebarItem.vue
     onlyOneShowingChild(children = [], parent) {
@@ -281,6 +327,52 @@ export default {
       }
 
       return false
+    },
+    // 权限
+    async handleAuthorize(scope) {
+      this.dialogLoading = true
+      this.role = scope.row
+
+      const roles = [scope.row.roleCode]
+      console.log('roles:', roles)
+      const singleBody = {
+        roles: roles
+      }
+      const reqParams = {
+        singleBody: singleBody
+      }
+      const params = getCommonData(reqParams)
+      const res = await getMenuIdsByRoles(params)
+      this.defaultCheckedKeys = res.body.listBody
+      this.authorizeVisible = true
+      this.dialogLoading = false
+    },
+    cancelAuthorize() {
+      this.authorizeVisible = false
+      this.defaultCheckedKeys = []
+      this.$refs.tree.setCheckedNodes([])
+    },
+    async confirmAuthorize() {
+      this.dialogLoading = true
+      const checkedKeys = this.$refs.tree.getCheckedKeys()
+      console.log('checkedKeys:', checkedKeys)
+      const singleBody = {
+        roleId: this.role.roleId
+      }
+      const reqParams = {
+        singleBody: singleBody,
+        listBody: checkedKeys,
+        userId: localStorage.getItem('userId')
+      }
+      const params = getCommonData(reqParams)
+      await updateRoleAuthority(params)
+      this.$refs.tree.setCheckedNodes([])
+      this.authorizeVisible = false
+      this.dialogLoading = false
+      this.$message({
+        message: '更新成功！',
+        type: 'success'
+      })
     }
   }
 }

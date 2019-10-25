@@ -15,6 +15,14 @@ export function getRoles(params) {
   })
 }
 
+export function getRolesByUserId(params) {
+  return request({
+    url: '/admin/role/queryRolesByUserId',
+    method: 'post',
+    data: params
+  })
+}
+
 export function addRole(data) {
   return request({
     url: '/role',
@@ -23,11 +31,19 @@ export function addRole(data) {
   })
 }
 
-export function updateRole(id, data) {
+export function updateRole(params) {
   return request({
-    url: `/role/${id}`,
-    method: 'put',
-    data
+    url: `/admin/role/updateRole`,
+    method: 'post',
+    data: params
+  })
+}
+
+export function updateRoleAuthority(params) {
+  return request({
+    url: `/admin/role/updateRoleAuthority`,
+    method: 'post',
+    data: params
   })
 }
 

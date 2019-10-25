@@ -60,7 +60,7 @@ const actions = {
       }
       const params = getCommonData(reqParams)
 
-      getInfo(state.token, params).then(response => {
+      getInfo(params).then(response => {
         const data = response.body.listBody[0]
         // console.log('getInfo:', response)
         if (!data) {
@@ -79,7 +79,8 @@ const actions = {
           reject('getInfo: roles must be a non-null array!')
         }
 
-        // localStorage.setItem('roles', JSON.stringify(roles))
+        localStorage.setItem('userId', sysUser.userId)
+        sessionStorage.setItem('userName', name)
 
         commit('SET_ROLES', roles)
         commit('SET_NAME', name)

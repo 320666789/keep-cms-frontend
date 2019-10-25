@@ -53,13 +53,19 @@ module.exports = {
       '/dooleenApi/oauth/token': {
         target: 'http://127.0.0.1:8401'
       },
-      '/admin/user/getUserInfoByUserName': {
-        target: 'http://127.0.0.1:8801'
-      },
-      '/admin/role/queryRoles': {
-        target: 'http://127.0.0.1:8801'
-      },
-      '/admin/menu/queryMenus': {
+      // '/admin/user/getUserInfoByUserName': {
+      //   target: 'http://127.0.0.1:8801'
+      // },
+      // '/admin/role/queryRoles': {
+      //   target: 'http://127.0.0.1:8801'
+      // },
+      // '/admin/menu/queryMenus': {
+      //   target: 'http://127.0.0.1:8801'
+      // },
+      // '/admin/menu/queryMenuIdsByRoles': {
+      //   target: 'http://127.0.0.1:8801'
+      // },
+      '/admin/*': {
         target: 'http://127.0.0.1:8801'
       }
     }

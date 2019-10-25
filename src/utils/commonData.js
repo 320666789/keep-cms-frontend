@@ -1,7 +1,7 @@
 export function getCommonData(reqParams) {
   var msgObj = {
     'head': {
-      'userId': '',
+      'userId': reqParams.userId,
       'openId': '',
       'ipAddr': '',
       'token': reqParams.token,

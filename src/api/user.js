@@ -21,7 +21,7 @@ export const login = (username, password) => {
   })
 }
 
-export function getInfo(token, params) {
+export function getInfo(params) {
   // return request({
   //   url: '/admin/user/getUserInfoByUserName',
   //   method: 'get',
@@ -29,9 +29,14 @@ export function getInfo(token, params) {
   // })
   return request({
     url: '/admin/user/getUserInfoByUserName',
-    headers: {
-      'Authorization': 'Bearer ' + token
-    },
+    method: 'post',
+    data: params
+  })
+}
+
+export function getUsers(params) {
+  return request({
+    url: '/admin/user/queryUsers',
     method: 'post',
     data: params
   })
