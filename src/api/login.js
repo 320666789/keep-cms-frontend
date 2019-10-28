@@ -4,9 +4,9 @@ export const loginByUsername = (username, password) => {
   var grant_type = 'password'
   var scope = 'all'
   return request({
-    url: '/dooleenApi/oauth/token',
+    url: '/keepApi/oauth/token',
     headers: {
-      'Authorization': 'Basic ZG9vbGVlbjpkb29sZWVu'
+      'Authorization': 'Basic a2VlcDprZWVw'
     },
     method: 'post',
     params: { username, password, grant_type, scope }

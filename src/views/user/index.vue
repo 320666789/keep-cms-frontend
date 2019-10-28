@@ -73,7 +73,7 @@
 </template>
 
 <script>
-import { getUsers } from "@/api/user";
+import { getUsers,updateUser } from "@/api/user";
 import { getCommonData } from "@/utils/commonData.js";
 import { getRoles, getRolesByUserId } from "@/api/role";
 export default {
@@ -142,6 +142,7 @@ export default {
       console.log("this.roleList:", this.roleList);
       this.userInfo = scope.row;
       this.dialogVisible = true;
+      this.dialogType = 'edit'
       this.dialogLoading = false;
     },
     // 删除
@@ -151,8 +152,27 @@ export default {
       this.dialogVisible = false;
     },
     // 确定
-    confirmUser() {
-      this.dialogVisible = false;
+    async confirmUser() {
+      // this.dialogLoading = true
+      const isEdit = this.dialogType === 'edit'
+      if (isEdit) {
+        console.log(this.userRoleIdList)
+        let roleIdList = JSON.parse(JSON.stringify(this.userRoleIdList))
+        let singleBody = JSON.parse(JSON.stringify(this.userInfo))
+        singleBody.roleIdList = roleIdList
+        const reqParams = {
+          singleBody: singleBody,
+          userId: localStorage.getItem('userId')
+        }
+        const params = getCommonData(reqParams)
+        await updateUser(params)
+        this.dialogVisible = false
+        this.dialogLoading = false
+        this.$message({
+          message: '更新成功！',
+          type: 'success'
+        })
+      }
     }
   }
 };

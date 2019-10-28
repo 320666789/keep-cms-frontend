@@ -50,7 +50,7 @@ module.exports = {
     // },
     // after: require('./mock/mock-server.js')
     proxy: {
-      '/dooleenApi/oauth/token': {
+      '/keepApi/oauth/token': {
         target: 'http://127.0.0.1:8401'
       },
       // '/admin/user/getUserInfoByUserName': {

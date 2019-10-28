@@ -48,10 +48,12 @@ service.interceptors.response.use(
     // console.log('response-->response:', response)
 
     // 判断是否是授权（获取token）
+    console.log('response:', response)
     if (response.config &&
-        response.config.url === '/dooleenApi/oauth/token' &&
+        response.config.url === '/keepApi/oauth/token' &&
         status === 200 &&
         res.access_token) {
+      console.log('11111')
       return res
     }
 

@@ -13,7 +13,7 @@
     <el-button type="primary" @click="handleAddMenu">新建菜单</el-button>
 
     <div class="menu-tree">
-      <el-tree :data="menuTree" node-key="id">
+      <el-tree :data="menuTree" node-key="id" :expand-on-click-node="false">
         <span slot-scope="{ node, data }">
           <span>{{ node.label }}</span>
           <span>
