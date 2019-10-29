@@ -1,4 +1,5 @@
 import { login, getInfo } from '@/api/user'
+import { getMenus } from '@/api/menu'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 import { getCommonData } from '@/utils/commonData.js'
@@ -93,6 +94,25 @@ const actions = {
     })
   },
 
+  // 获取所有菜单
+  getMenus({ commit, state, dispatch }) {
+    return new Promise(async(resolve, reject) => {
+    // 获取菜单权限，存在localstorage中
+      const singleBody = {}
+      const reqParams = {
+        singleBody: singleBody
+      }
+      const params = getCommonData(reqParams)
+      await getMenus(params).then(res => {
+        console.log('routerApp:', res)
+        localStorage.setItem('routerApp', JSON.stringify(res.body.listBody))
+      }).catch(error => {
+        reject(error)
+      })
+      resolve()
+    })
+  },
+
   // user logout
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
@@ -108,20 +128,6 @@ const actions = {
       dispatch('tagsView/delAllViews', null, { root: true })
 
       resolve()
-      // logout(state.token).then(() => {
-      //   commit('SET_TOKEN', '')
-      //   commit('SET_ROLES', [])
-      //   removeToken()
-      //   resetRouter()
-
-      //   // reset visited views and cached views
-      //   // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
-      //   dispatch('tagsView/delAllViews', null, { root: true })
-
-      //   resolve()
-      // }).catch(error => {
-      //   reject(error)
-      // })
     })
   },
 

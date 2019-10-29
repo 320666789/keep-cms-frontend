@@ -47,5 +47,8 @@ new Vue({
   el: '#app',
   router,
   store,
+  // created() {
+  //   const _self = this
+  // },
   render: h => h(App)
 })

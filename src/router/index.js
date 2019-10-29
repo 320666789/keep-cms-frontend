@@ -11,7 +11,7 @@ import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
-import customRouter from './modules/custom'
+// import customRouter from './modules/custom'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -184,24 +184,25 @@ export const asyncRoutes = [
       }
     ]
   },
-  {
-    path: '/menu',
-    component: Layout,
-    redirect: '/menu/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/menu/index'),
-        name: '菜单管理',
-        meta: {
-          title: '菜单管理',
-          icon: 'list',
-          noCache: true,
-          roles: ['admin'] // you can set roles in root nav
-        }
-      }
-    ]
-  },
+  // {
+  //   path: '/menu',
+  //   component: Layout,
+  //   redirect: '/menu/index',
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       // component: () => import('@/views/menu/index'),
+  //       component: resolve => require(['@/views/menu/index'],resolve),
+  //       name: '菜单管理',
+  //       meta: {
+  //         title: '菜单管理',
+  //         icon: 'list',
+  //         noCache: true,
+  //         roles: ['admin'] // you can set roles in root nav
+  //       }
+  //     }
+  //   ]
+  // },
   // customRouter,
   {
     path: '/icon',
@@ -419,11 +420,14 @@ export const asyncRoutes = [
   { path: '*', redirect: '/404', hidden: true }
 ]
 
-const createRouter = () => new Router({
-  // mode: 'history', // require service support
-  scrollBehavior: () => ({ y: 0 }),
-  routes: constantRoutes
-})
+const createRouter = () => {
+  console.log('createRouter.....')
+  return new Router({
+    // mode: 'history', // require service support
+    scrollBehavior: () => ({ y: 0 }),
+    routes: constantRoutes
+  })
+}
 
 const router = createRouter()
 
