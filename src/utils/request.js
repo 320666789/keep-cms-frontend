@@ -14,7 +14,7 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // do something before request is sent
-    console.log('store.getters:', store.getters)
+    console.log('request-->store.getters:', store.getters)
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
