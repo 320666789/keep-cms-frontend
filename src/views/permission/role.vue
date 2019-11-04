@@ -28,7 +28,7 @@
     </el-table>
 
     <!-- 新增、编辑角色 -->
-    <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'" show-close v-loading="dialogLoading">
+    <el-dialog v-loading="dialogLoading" :visible.sync="dialogVisible" :title="dialogType==='edit'?'编辑角色':'新建角色'" show-close>
       <el-form :model="role" label-width="80px" label-position="left">
         <el-form-item label="角色名称">
           <el-input v-model="role.roleName" placeholder="请输入角色名称" />
@@ -49,7 +49,7 @@
     </el-dialog>
 
     <!-- 权限设置 -->
-    <el-dialog :visible.sync="authorizeVisible" title="分配权限" show-close v-loading="dialogLoading">
+    <el-dialog v-loading="dialogLoading" :visible.sync="authorizeVisible" title="分配权限" show-close>
       <el-tree
         ref="tree"
         :check-strictly="checkStrictly"
@@ -71,8 +71,8 @@
 
 <script>
 import path from 'path'
-import { deepClone } from '@/utils'
-import { getRoutes, getRoles, addRole, deleteRole, updateRole, updateRoleAuthority } from '@/api/role'
+// import { deepClone } from '@/utils'
+import { getRoutes, getRoles, deleteRole, updateRole, updateRoleAuthority } from '@/api/role'
 import { getMenus, getMenuIdsByRoles } from '@/api/menu'
 import { getCommonData } from '@/utils/commonData.js'
 import store from '@/store'
@@ -131,7 +131,10 @@ export default {
       }
       const params = getCommonData(reqParams)
       const res = await getRoles(params)
-      this.rolesList = res.body.listBody
+      console.log('getRoles...res:', res)
+      if (res.body) {
+        this.rolesList = res.body.listBody
+      }
     },
     // 查询所有菜单
     async getMenus() {

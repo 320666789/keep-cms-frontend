@@ -50,7 +50,7 @@ service.interceptors.response.use(
     // 判断是否是授权（获取token）
     console.log('response:', response)
     if (response.config &&
-        response.config.url === '/keepApi/oauth/token' &&
+        response.config.url === '/auth/keepApi/oauth/token' &&
         status === 200 &&
         res.access_token) {
       console.log('11111')
@@ -58,7 +58,7 @@ service.interceptors.response.use(
     }
 
     // if the custom code is not 20000, it is judged as an error.
-    if (res.head.errorCode !== '0000') {
+    if (res.head && res.head.errorCode !== '0000') {
       Message({
         message: res.message || 'Error',
         type: 'error',

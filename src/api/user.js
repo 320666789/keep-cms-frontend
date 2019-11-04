@@ -12,7 +12,7 @@ export const login = (username, password) => {
   var grant_type = 'password'
   var scope = 'all'
   return request({
-    url: '/keepApi/oauth/token',
+    url: '/auth/keepApi/oauth/token',
     headers: {
       'Authorization': 'Basic a2VlcDprZWVw'
     },
